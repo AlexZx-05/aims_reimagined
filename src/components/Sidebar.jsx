@@ -23,7 +23,9 @@ export default function Sidebar() {
 
   return (
     <div className="w-64 min-h-screen bg-white border-r p-4 flex flex-col">
-      <img src="/logo.png" className="w-28 mb-8" alt="AIMS Logo" />
+      <div className="flex justify-center mb-8">
+        <img src="/logo.png" className="w-40" alt="AIMS Logo" />
+      </div>
 
       <nav className="flex-1 space-y-1">
         {links.map((link) => (

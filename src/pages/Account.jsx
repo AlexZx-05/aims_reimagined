@@ -5,6 +5,7 @@ import { getLoggedInUser, saveUserUpdates } from "../utils/auth";
 export default function Account() {
   const [user, setUser] = useState(getLoggedInUser());
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Convert file → base64
   const toBase64 = (file, callback) => {
@@ -42,6 +43,17 @@ export default function Account() {
     saveUserUpdates(user);
     setEditMode(false);
   };
+
+  if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-900 mx-auto"></div>
+                    <p className="text-gray-600 mt-2">Loading Account Management Portal...</p>
+                </div>
+            </div>
+        );
+    }
 
   return (
     <AppLayout>
