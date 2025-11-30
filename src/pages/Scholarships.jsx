@@ -44,12 +44,24 @@ export default function Scholarships() {
                   <span className="font-medium">Deadline:</span> {sch.deadline}
                 </p>
 
-                <button
-                  onClick={() => handleApply(sch)}
-                  className="mt-3 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Apply Now
-                </button>
+                {sch.link ? (
+  <a
+    href={sch.link}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="mt-3 inline-block px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-700"
+  >
+    Apply Now
+  </a>
+) : (
+  <button
+    onClick={() => handleApply(sch)}
+    className="mt-3 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-700"
+  >
+    Apply Now
+  </button>
+)}
+
               </div>
             ))}
           </div>
