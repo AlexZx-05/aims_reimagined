@@ -12,9 +12,7 @@ export default function Dashboard() {
         <h1 className="text-3xl font-semibold">
           Welcome back, {user?.name} 👋
         </h1>
-        <p className="text-gray-600">
-          Here’s your academic overview for this semester.
-        </p>
+        
       </div>
 
       {/* Top Stats */}

@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Briefcase,
   CalendarDays,
+  Heart,
   Menu // Hamburger icon
 } from "lucide-react";
 
@@ -19,7 +20,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     { name: "Course Registration", path: "/course-registration", icon: <FileCheck size={20} /> },
     { name: "Grades", path: "/grades", icon: <GraduationCap size={20} /> },
     { name: "Scholarships", path: "/scholarship", icon: <Star size={20} /> },
-    { name: "Favorites", path: "/favorites", icon: <Star size={20} /> },
+    { name: "Favorites", path: "/favorites", icon: <Heart size={20} /> },
     { name: "Notifications", path: "/inbox", icon: <Bell size={20} /> },
     { name: "Complaints", path: "/complaints", icon: <MessageSquare size={20} /> },
     { name: "Placements", path: "/placements", icon: <Briefcase size={20} /> },
