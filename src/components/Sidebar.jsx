@@ -1,8 +1,5 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { logoutUser } from "../utils/auth";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
-  Home,
   User,
   BookOpen,
   FileCheck,
@@ -12,71 +9,98 @@ import {
   MessageSquare,
   Briefcase,
   CalendarDays,
-  LogOut
+  Heart,
+  Menu // Hamburger icon
 } from "lucide-react";
-
 
 export default function Sidebar({ collapsed, setCollapsed }) {
   const links = [
-    { name: "Dashboard", path: "/dashboard", icon: <Home size={20} /> },
     { name: "My Details", path: "/account", icon: <User size={20} /> },
     { name: "Academic Registration", path: "/registration", icon: <BookOpen size={20} /> },
     { name: "Course Registration", path: "/course-registration", icon: <FileCheck size={20} /> },
     { name: "Grades", path: "/grades", icon: <GraduationCap size={20} /> },
     { name: "Scholarships", path: "/scholarship", icon: <Star size={20} /> },
-    { name: "Favorites", path: "/favorites", icon: <Star size={20} /> },
+    { name: "Favorites", path: "/favorites", icon: <Heart size={20} /> },
     { name: "Notifications", path: "/inbox", icon: <Bell size={20} /> },
-    { name: "Complaints", path: "/complaints", icon: <MessageSquare size={20} /> },
+    /*{ name: "Complaints", path: "/complaints", icon: <MessageSquare size={20} /> },*/
     { name: "Placements", path: "/placements", icon: <Briefcase size={20} /> },
     { name: "Calendar", path: "/calendar", icon: <CalendarDays size={20} /> },
   ];
 
   const navigate = useNavigate();
-  const handleLogout = () => {
-    logoutUser();
-    navigate("/");
+  const location = useLocation();
+  const isDashboard = location.pathname === "/dashboard";
+
+  const handleDashboardClick = () => {
+    setCollapsed(!collapsed); // Toggle sidebar
+    navigate("/dashboard");
+  };
+
+  // This will run when any NavLink is clicked.
+  // It toggles the collapsed state (same as Dashboard behavior).
+  const handleLinkClick = () => {
+    setCollapsed(!collapsed);
+    // don't call navigate here — NavLink handles navigation
   };
 
   return (
-    <div
-      className={`fixed left-0 top-0 bottom-0 z-30 w-64 bg-white border-r p-4 flex flex-col transition-transform duration-300 transform ${
-        collapsed ? "-translate-x-full" : "translate-x-0"
+    // Sidebar is fixed so it overlays the app; content must account for its width (ml-20 or ml-64)
+    <aside
+      className={`fixed left-0 top-0 bottom-0 z-30 bg-white border-r flex flex-col transition-all duration-300 ${
+        collapsed ? "w-20" : "w-64"
       }`}
     >
-            {/* Floating toggle removed — Navbar contains the toggle now */}
+      <nav className="flex-1 space-y-1 p-2 relative overflow-y-auto overflow-x-hidden pt-4">
+        {/* Dashboard toggle item */}
+        <button
+          onClick={handleDashboardClick}
+          className={`w-full flex items-center gap-3 py-2 rounded-lg font-medium transition-colors mb-1
+            ${isDashboard ? "bg-blue-900 text-white" : "text-gray-700 hover:bg-gray-100"}
+            ${collapsed ? "justify-center gap-0 px-0" : "px-3"}
+          `}
+          title={collapsed ? "Dashboard" : ""}
+          aria-expanded={!collapsed}
+        >
+          <span className={`flex-shrink-0 ${collapsed ? "mx-auto" : ""}`}>
+            <Menu size={20} />
+          </span>
 
-      {/* Links */}
-      <nav className="flex-1 space-y-1 relative overflow-auto">
+          <span
+            className={`whitespace-nowrap transition-all duration-300 overflow-hidden ${
+              collapsed ? "w-0 opacity-0" : "w-auto opacity-100 ml-1"
+            }`}
+          >
+            Dashboard
+          </span>
+        </button>
+
+        {/* Links */}
         {links.map((link) => (
           <NavLink
             key={link.name}
             to={link.path}
+            onClick={handleLinkClick}               // <-- toggle on click
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 font-medium transition
-              ${isActive ? "bg-blue-900 text-white" : "hover:bg-gray-100"}`
+              `flex items-center gap-3 py-3 rounded-lg text-gray-700 font-medium transition-colors mb-1
+               ${isActive ? "bg-blue-900 text-white" : "hover:bg-gray-100"}
+               ${collapsed ? "justify-center gap-0 px-0" : "px-3"}`
             }
+            title={collapsed ? link.name : ""}
+            role="button"
+            aria-pressed={!collapsed}               // indicates the sidebar is expanded (not pressed) — optional
           >
-            {/* Icon (placeholder for now) */}
-            <span>{link.icon}</span>
+            <span className={`flex-shrink-0 ${collapsed ? "mx-auto" : ""}`}>{link.icon}</span>
 
-            {/* Hide text in collapsed mode */}
-            {!collapsed && <span>{link.name}</span>}
+            <span
+              className={`whitespace-nowrap transition-all duration-300 overflow-hidden ${
+                collapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+              }`}
+            >
+              {link.name}
+            </span>
           </NavLink>
         ))}
       </nav>
-
-      {/* Logout moved to Navbar (kept sidebar minimal) */}
-      {/* Cut: small tab to hide the sidebar when open */}
-      {!collapsed && (
-        <button
-          onClick={() => setCollapsed(true)}
-          className="absolute left-56 top-20 z-50 w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-700 transition"
-          aria-label="Close sidebar"
-          title="Close sidebar"
-        >
-          ✕
-        </button>
-      )}
-    </div>
+    </aside>
   );
 }

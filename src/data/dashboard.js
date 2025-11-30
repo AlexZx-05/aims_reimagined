@@ -1,7 +1,7 @@
 const dashboardData = {
   gpa: 8.7,
   creditsEarned: 72,
-  totalCredits: 160,
+  totalCredits: 120,
   attendance: 91,
   pendingFees: 12000,
   events: [

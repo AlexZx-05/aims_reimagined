@@ -34,10 +34,10 @@ const users = [
   },
 
   {
-    id: "cs22b1000",
-    email: "cs22b1000@iiitr.ac.in",
+    id: "cs22b1042",
+    email: "cs22b1042@iiitr.ac.in",
     password: "123456",
-    name: "Student",
+    name: "Pavan Kumar",
     role: "student",
     commonEmail: "student.personal@gmail.com",
 

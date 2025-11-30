@@ -13,7 +13,7 @@ const favoritesData = {
     {
       id: "R01",
       name: "Academic Calendar 2025",
-      link: "https://iiitr.ac.in/calendar.pdf",
+      link: "https://iiitr.ac.in/assets/files/calendars/2025/Academic%20Calendar_Jul-Dec%202025.pdf",
       category: "Resource"
     },
     {

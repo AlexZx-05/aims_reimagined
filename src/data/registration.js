@@ -10,9 +10,9 @@ const registrationData = {
   ],
 
   documents: [
-    { name: "Academic Calendar", link: "/docs/calendar.pdf" },
-    { name: "Registration Rules", link: "/docs/rules.pdf" },
-    { name: "Course Catalog", link: "/docs/catalog.pdf" },
+    { name: "Academic Calendar", link: "https://iiitr.ac.in/calendars" },
+    { name: "Registration Rules", link: "curriculum" },
+    { name: "Course Catalog", link: "https://iiitr.ac.in/curriculum" },
   ],
 
   registrationLimits: {
