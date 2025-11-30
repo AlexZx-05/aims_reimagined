@@ -9,7 +9,7 @@ const placementsData = {
       ctc: "38 LPA",
       location: "Bangalore",
       minCGPA: 8.0,
-      logo: "/companies/google.png"
+      logo: "/companies/google.jpeg"
     },
     {
       id: "C02",
@@ -18,7 +18,7 @@ const placementsData = {
       ctc: "32 LPA",
       location: "Hyderabad",
       minCGPA: 7.5,
-      logo: "/companies/amazon.png"
+      logo: "/companies/amazon.jpeg"
     },
     {
       id: "C03",
@@ -27,7 +27,7 @@ const placementsData = {
       ctc: "18 LPA",
       location: "Bangalore",
       minCGPA: 7.0,
-      logo: "/companies/intel.png"
+      logo: "/companies/intel.jpeg"
     },
     {
       id: "C04",
@@ -36,7 +36,7 @@ const placementsData = {
       ctc: "7 LPA",
       location: "Chennai",
       minCGPA: 6.0,
-      logo: "/companies/tcs.png"
+      logo: "/companies/tcs.jpeg"
     }
   ]
 };

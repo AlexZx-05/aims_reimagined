@@ -26,3 +26,14 @@ export function saveUserUpdates(updatedUser) {
 export function logoutUser() {
   localStorage.removeItem("user");
 }
+
+// Simulate a password reset request. Returns true if email exists.
+export function requestPasswordReset(email) {
+  const found = users.find((u) => u.email === email);
+  if (!found) return false;
+
+  // Simulate storing a reset token (for demo purposes only)
+  const token = `reset-${found.id}-${Date.now()}`;
+  localStorage.setItem("reset_token_" + found.id, token);
+  return true;
+}

@@ -7,16 +7,9 @@ export default function Registration() {
     return localStorage.getItem("registration_status") || "Not Started";
   });
 
-  const [confirmed, setConfirmed] = useState(false);
-
   useEffect(() => {
     localStorage.setItem("registration_status", status);
   }, [status]);
-
-  const startRegistration = () => {
-    setStatus("Pending");
-    setConfirmed(true);
-  };
 
   const completeRegistration = () => {
     setStatus("Completed");
@@ -79,22 +72,7 @@ export default function Registration() {
         </div>
       </section>
 
-      {/* START REGISTRATION */}
-      {status === "Not Started" && (
-        <div className="bg-white p-6 rounded-xl shadow border">
-          <h2 className="text-xl font-semibold mb-3">Start Registration</h2>
-          <p className="text-gray-600 mb-4">
-            Please confirm the details before proceeding to course registration.
-          </p>
-
-          <button
-            className="px-5 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-700"
-            onClick={startRegistration}
-          >
-            Begin Registration
-          </button>
-        </div>
-      )}
+      {/* 'Start Registration' section removed as requested */}
 
       {/* IN PROGRESS */}
       {status === "Pending" && (

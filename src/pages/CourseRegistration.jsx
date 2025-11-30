@@ -19,9 +19,18 @@ export default function CourseRegistration() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [semesterFilter, setSemesterFilter] = useState("All");
+  const [creditTypeFilter, setCreditTypeFilter] = useState("All");
 
   // registrationType per course (Regular / Backlog / Improvement / Honours)
   const [regType, setRegType] = useState({}); // { [courseId]: "Backlog" }
+  // which course info tooltip is hovered (to keep tooltip visible when moving between icon and tooltip)
+  const [hoverInfo, setHoverInfo] = useState(null);
+  // Submission deadline: edit this date or set `course_deadline` in localStorage (ISO string)
+  const submissionDeadline = new Date(
+    localStorage.getItem("course_deadline") || "2025-12-31T23:59:59"
+  );
+  const isBeforeDeadline = new Date() <= submissionDeadline;
 
   // Auto-save registered courses
   useEffect(() => {
@@ -47,18 +56,27 @@ export default function CourseRegistration() {
         categoryFilter === "All" ||
         (course.category && course.category === categoryFilter);
 
+      const matchSemester =
+        semesterFilter === "All" ||
+        (course.semester && course.semester.toString() === semesterFilter);
+
+      const matchCreditType =
+        creditTypeFilter === "All" ||
+        (course.creditType && course.creditType === creditTypeFilter);
+
       const search = searchTerm.trim().toLowerCase();
       const matchSearch =
         !search ||
         course.id.toLowerCase().includes(search) ||
         course.name.toLowerCase().includes(search);
 
-      return matchCategory && matchSearch;
+      return matchCategory && matchSearch && matchSemester && matchCreditType;
     });
-  }, [courses, categoryFilter, searchTerm]);
+  }, [courses, categoryFilter, searchTerm, semesterFilter, creditTypeFilter]);
 
   const addCourse = (course) => {
-    if (submitted) return;
+    // If submitted and past deadline, prevent adding
+    if (submitted && !isBeforeDeadline) return;
 
     if (registered.some((c) => c.id === course.id)) return;
 
@@ -80,7 +98,8 @@ export default function CourseRegistration() {
   };
 
   const dropCourse = (course) => {
-    if (submitted) return;
+    // If submitted and past deadline, prevent dropping
+    if (submitted && !isBeforeDeadline) return;
 
     setRegistered(registered.filter((c) => c.id !== course.id));
 
@@ -115,19 +134,25 @@ export default function CourseRegistration() {
       : 0;
 
   const registrationStatus = submitted
-    ? "Submitted to Faculty Advisor"
+    ? isBeforeDeadline
+      ? "Submitted (Editable until deadline)"
+      : "Submitted to Faculty Advisor"
     : registered.length > 0
     ? "Draft in Progress"
     : "Not Started";
 
   const registrationStatusColor = submitted
-    ? "text-green-700"
+    ? isBeforeDeadline
+      ? "text-blue-700"
+      : "text-green-700"
     : registered.length > 0
     ? "text-yellow-700"
     : "text-red-600";
 
   const registrationStatusBg = submitted
-    ? "bg-green-50 border-green-300"
+    ? isBeforeDeadline
+      ? "bg-blue-50 border-blue-200"
+      : "bg-green-50 border-green-300"
     : registered.length > 0
     ? "bg-yellow-50 border-yellow-300"
     : "bg-red-50 border-red-300";
@@ -188,7 +213,9 @@ export default function CourseRegistration() {
 
           {submitted && (
             <p className="mt-2 text-sm text-gray-700">
-              Submitted. Add/Drop is now locked.
+              {isBeforeDeadline
+                ? `Submitted. You can still edit courses until ${submissionDeadline.toLocaleString()}.`
+                : "Submitted. Add/Drop is now locked."}
             </p>
           )}
           {!submitted && registered.length > 0 && (
@@ -212,14 +239,21 @@ export default function CourseRegistration() {
           <div className="flex flex-col md:flex-row gap-3">
             <input
               type="text"
-              className="px-3 py-2 border rounded-lg bg-gray-50"
+              className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400"
               placeholder="Search code or name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
 
             <select
-              className="px-3 py-2 border rounded-lg bg-gray-50"
+              className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400 hover:shadow-md cursor-pointer appearance-none font-medium"
+              style={{
+                backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.7rem center',
+                backgroundSize: '1.2em 1.2em',
+                paddingRight: '2.5rem'
+              }}
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
@@ -228,6 +262,47 @@ export default function CourseRegistration() {
                   {cat === "All" ? "All Categories" : cat}
                 </option>
               ))}
+            </select>
+
+            <select
+              className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400 hover:shadow-md cursor-pointer appearance-none font-medium"
+              style={{
+                backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.7rem center',
+                backgroundSize: '1.2em 1.2em',
+                paddingRight: '2.5rem'
+              }}
+              value={semesterFilter}
+              onChange={(e) => setSemesterFilter(e.target.value)}
+            >
+              <option value="All">All Semesters</option>
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+              <option value="3">Semester 3</option>
+              <option value="4">Semester 4</option>
+              <option value="5">Semester 5</option>
+              <option value="6">Semester 6</option>
+              <option value="7">Semester 7</option>
+              <option value="8">Semester 8</option>
+            </select>
+
+            <select
+              className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400 hover:shadow-md cursor-pointer appearance-none font-medium"
+              style={{
+                backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.7rem center',
+                backgroundSize: '1.2em 1.2em',
+                paddingRight: '2.5rem'
+              }}
+              value={creditTypeFilter}
+              onChange={(e) => setCreditTypeFilter(e.target.value)}
+            >
+              <option value="All">All Credit Types</option>
+              <option value="1">1 Credit</option>
+              <option value="3">3 Credits</option>
+              <option value="4">4 Credits</option>
             </select>
           </div>
         </div>
@@ -240,6 +315,7 @@ export default function CourseRegistration() {
             const creditExceeded =
               totalCredits + course.credits > creditRules.max;
             const regTypeForCourse = regType[course.id] || "Regular";
+            const vacantSeats = course.totalSeats - course.filledSeats;
 
             return (
               <div
@@ -252,28 +328,77 @@ export default function CourseRegistration() {
                     <h3 className="text-lg font-semibold">{course.name}</h3>
 
                     {/* INFO ICON */}
-                    <div className="relative group">
-                      <span className="cursor-pointer text-blue-700 font-bold text-sm">
+                    <div
+                      className="relative group"
+                      onMouseEnter={() => setHoverInfo(course.id)}
+                      onMouseLeave={() => setHoverInfo(null)}
+                    >
+                      <span className="cursor-pointer text-blue-600 hover:text-blue-800 font-bold text-lg bg-blue-50 hover:bg-blue-100 rounded-full w-6 h-6 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md">
                         ⓘ
                       </span>
 
-                      {/* TOOLTIP */}
-                      <div className="absolute left-6 top-0 hidden group-hover:block z-20">
-                        <div className="p-3 bg-white border rounded-lg shadow-lg w-64">
-                          <p className="text-sm font-semibold">{course.id}</p>
-                          <p className="text-gray-700 text-sm">{course.name}</p>
-                          <p className="text-gray-500 text-xs mt-1">
-                            Faculty: {course.faculty}
-                          </p>
-                          <p className="text-gray-500 text-xs">
-                            Category: {course.category}
-                          </p>
-                          <p className="text-gray-500 text-xs">
-                            Credits: {course.credits}
-                          </p>
-                          <p className="text-gray-500 text-xs">
-                            Seats: {course.filledSeats}/{course.totalSeats}
-                          </p>
+                      {/* ENHANCED TOOLTIP (visible on hover or while hovered state is set) */}
+                      <div className={`absolute left-6 top-0 z-20 ${hoverInfo === course.id ? 'block' : 'hidden'} group-hover:block`}>
+                        <div className="p-4 bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl shadow-xl w-80">
+                          {/* Header */}
+                          <div className="border-b border-gray-200 pb-3 mb-3">
+                            <p className="text-sm font-bold text-gray-900">{course.id}</p>
+                            <p className="text-gray-700 text-sm font-semibold mt-1">{course.name}</p>
+                          </div>
+
+                          {/* Instructor & Category */}
+                          <div className="grid grid-cols-2 gap-3 mb-3 pb-3 border-b border-gray-100">
+                            <div>
+                              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Instructor</p>
+                              <p className="text-sm text-gray-900 font-medium">{course.faculty}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Category</p>
+                              <p className="text-sm text-gray-900 font-medium">{course.category}</p>
+                            </div>
+                          </div>
+
+                          {/* Semester & Credits */}
+                          <div className="grid grid-cols-2 gap-3 mb-3 pb-3 border-b border-gray-100">
+                            <div>
+                              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Semester</p>
+                              <p className="text-sm text-gray-900 font-medium">Sem {course.semester}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Credits</p>
+                              <p className="text-sm text-gray-900 font-medium">{course.creditType} Cr</p>
+                            </div>
+                          </div>
+
+                          {/* Seat Information */}
+                          <div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-2">Seat Information</p>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-gray-600">Total Seats:</span>
+                                <span className="text-sm font-semibold text-gray-900">{course.totalSeats}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-gray-600">Filled Seats:</span>
+                                <span className="text-sm font-semibold text-orange-600">{course.filledSeats}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-gray-600">Vacant Seats:</span>
+                                <span className={`text-sm font-semibold ${vacantSeats === 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                  {vacantSeats}
+                                </span>
+                              </div>
+                              {/* Seat Progress Bar */}
+                              <div className="mt-2 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                <div
+                                  className={`h-2 transition-all ${
+                                    isFull ? 'bg-red-500' : course.filledSeats / course.totalSeats > 0.75 ? 'bg-orange-500' : 'bg-green-500'
+                                  }`}
+                                  style={{ width: `${(course.filledSeats / course.totalSeats) * 100}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -281,46 +406,56 @@ export default function CourseRegistration() {
 
                   <p className="text-gray-600 text-sm">{course.faculty}</p>
                   <p className="text-gray-500 text-xs">Category: {course.category}</p>
+                  <p className="text-gray-500 text-xs">Semester: {course.semester} | Credits: {course.creditType} Credit(s)</p>
                 </div>
 
                 {/* RIGHT */}
                 <div className="flex flex-col items-end gap-2 mt-3 md:mt-0">
-                  <select
-                    disabled={submitted}
-                    className="px-3 py-2 border rounded-lg bg-gray-50 text-sm"
-                    value={regTypeForCourse}
-                    onChange={(e) =>
-                      setRegType((prev) => ({
-                        ...prev,
-                        [course.id]: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="Regular">Regular</option>
-                    <option value="Backlog">Backlog</option>
-                    <option value="Improvement">Improvement</option>
-                    <option value="Honours">Honours</option>
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      disabled={submitted && !isBeforeDeadline}
+                      className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400 hover:shadow-md cursor-pointer appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 0.5rem center',
+                        backgroundSize: '1rem 1rem',
+                        paddingRight: '2rem'
+                      }}
+                      value={regTypeForCourse}
+                      onChange={(e) =>
+                        setRegType((prev) => ({
+                          ...prev,
+                          [course.id]: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Regular">Regular</option>
+                      <option value="Backlog">Backlog</option>
+                      <option value="Improvement">Improvement</option>
+                      <option value="Honours">Honours</option>
+                    </select>
 
-                  <button
-                    onClick={() => addCourse(course)}
-                    disabled={submitted || isFull || alreadyAdded || creditExceeded}
-                    className={`px-4 py-2 rounded-lg text-white text-sm ${
-                      submitted || isFull || alreadyAdded || creditExceeded
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-blue-900 hover:bg-blue-700"
-                    }`}
-                  >
-                    {submitted
-                      ? "Locked"
-                      : alreadyAdded
-                      ? "Added"
-                      : isFull
-                      ? "Full"
-                      : creditExceeded
-                      ? "Limit Exceeded"
-                      : "Add"}
-                  </button>
+                    <button
+                      onClick={() => addCourse(course)}
+                      disabled={(submitted && !isBeforeDeadline) || isFull || alreadyAdded || creditExceeded}
+                      className={`px-4 py-2 rounded-lg text-white text-sm ${
+                        (submitted && !isBeforeDeadline) || isFull || alreadyAdded || creditExceeded
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-blue-900 hover:bg-blue-700"
+                      }`}
+                    >
+                      {submitted && !isBeforeDeadline
+                        ? "Locked"
+                        : alreadyAdded
+                        ? "Added"
+                        : isFull
+                        ? "Full"
+                        : creditExceeded
+                        ? "Limit Exceeded"
+                        : "Add"}
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -362,14 +497,14 @@ export default function CourseRegistration() {
                 <p className="font-medium">{course.credits} Credits</p>
                 <button
                   onClick={() => dropCourse(course)}
-                  disabled={submitted}
+                  disabled={submitted && !isBeforeDeadline}
                   className={`px-4 py-2 rounded-lg text-white ${
-                    submitted
+                    submitted && !isBeforeDeadline
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-red-600 hover:bg-red-500"
                   }`}
                 >
-                  {submitted ? "Locked" : "Drop"}
+                  {submitted && !isBeforeDeadline ? "Locked" : "Drop"}
                 </button>
               </div>
             </div>

@@ -11,6 +11,7 @@ import Complaints from "./pages/Complaints";
 import Placements from "./pages/Placements";
 import Registration from "./pages/Registration";
 import CourseRegistration from "./pages/CourseRegistration";
+import ForgotPassword from "./pages/ForgotPassword";
 import { getLoggedInUser } from "./utils/auth";
 
 export default function App() {
@@ -124,6 +125,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </BrowserRouter>
   );

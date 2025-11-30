@@ -64,7 +64,7 @@ export default function Account() {
         {/* TOP SECTION */}
         <div className="flex items-center gap-6">
           <img
-            src={user.photo || "/avatar.jpg"}
+            src={user.photo || "/logo.png"}
             className="w-28 h-28 rounded-full object-cover border"
             alt="profile"
           />
@@ -259,7 +259,14 @@ function DropDown({ label, field, value, options, edit, onChange }) {
         <select
           value={value || ""}
           onChange={(e) => onChange(field, e.target.value)}
-          className="w-full border px-3 py-2 rounded-lg bg-gray-50"
+          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400 hover:shadow-md cursor-pointer appearance-none font-medium"
+          style={{
+            backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 0.7rem center',
+            backgroundSize: '1.2em 1.2em',
+            paddingRight: '2.5rem'
+          }}
         >
           <option value="">Select</option>
           {options.map((opt) => (

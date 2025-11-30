@@ -6,7 +6,20 @@ export default function Grades() {
   const [selectedSem, setSelectedSem] = useState(null);
 
   const allSemesters = gradesData.semesters;
-  const cgpa = gradesData.cgpa;
+  // Compute cumulative GPA (weighted by credits) if not provided in data
+  const computeCgpa = () => {
+    let totalPoints = 0;
+    let totalCredits = 0;
+    allSemesters.forEach((sem) => {
+      const semCredits = sem.courses.reduce((s, c) => s + (c.credits || 0), 0);
+      totalPoints += (sem.gpa || 0) * semCredits;
+      totalCredits += semCredits;
+    });
+    if (totalCredits === 0) return "—";
+    return (totalPoints / totalCredits).toFixed(2);
+  };
+
+  const cgpa = gradesData.cgpa ?? computeCgpa();
 
   return (
     <AppLayout>
@@ -16,6 +29,7 @@ export default function Grades() {
       <div className="bg-white p-6 rounded-xl shadow border mb-8 w-full max-w-md">
         <p className="text-gray-600">Cumulative GPA</p>
         <h2 className="text-5xl font-bold text-blue-900">{cgpa}</h2>
+        <p className="text-sm text-gray-500 mt-2">Calculated as weighted average of semester GPAs by credit hours.</p>
       </div>
 
       {/* ----- SEMESTER LIST (MAIN PAGE) ----- */}

@@ -39,31 +39,14 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
   return (
     <div
-      className={`relative min-h-screen bg-white border-r p-4 flex flex-col transition-all duration-300
-      ${collapsed ? "w-20" : "w-64"}`}
+      className={`fixed left-0 top-0 bottom-0 z-30 w-64 bg-white border-r p-4 flex flex-col transition-transform duration-300 transform ${
+        collapsed ? "-translate-x-full" : "translate-x-0"
+      }`}
     >
-            {/* Floating Toggle Button */}
-      <div className="absolute right-[-12px] flex items-center">
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="bg-white border shadow px-1 py-1 rounded-full hover:bg-gray-100 transition"
-        >
-          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-        </button>
-      </div>
-
-
-      {/* Logo */}
-      <div className="flex justify-center mb-8">
-        <img
-          src="/logo.png"
-          className={`${collapsed ? "w-12" : "w-40"} transition-all`}
-          alt="AIMS Logo"
-        />
-      </div>
+            {/* Floating toggle removed — Navbar contains the toggle now */}
 
       {/* Links */}
-      <nav className="flex-1 space-y-1 relative">
+      <nav className="flex-1 space-y-1 relative overflow-auto">
         {links.map((link) => (
           <NavLink
             key={link.name}
@@ -82,14 +65,18 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         ))}
       </nav>
 
-      {/* Logout */}
-      <button
-        onClick={handleLogout}
-        className="mt-6 text-red-600 font-medium flex items-center gap-2"
-      >
-        <span>⏻</span>
-        {!collapsed && <span>Logout</span>}
-      </button>
+      {/* Logout moved to Navbar (kept sidebar minimal) */}
+      {/* Cut: small tab to hide the sidebar when open */}
+      {!collapsed && (
+        <button
+          onClick={() => setCollapsed(true)}
+          className="absolute left-56 top-20 z-50 w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-700 transition"
+          aria-label="Close sidebar"
+          title="Close sidebar"
+        >
+          ✕
+        </button>
+      )}
     </div>
   );
 }
