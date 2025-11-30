@@ -89,14 +89,14 @@ export default function App() {
             }
           />
 
-          <Route
+          {/* <Route
             path="/complaints"
             element={
               <ProtectedRoute>
                 <Complaints />
               </ProtectedRoute>
             }
-          />
+          /> */}
 
             <Route
               path="/placements"

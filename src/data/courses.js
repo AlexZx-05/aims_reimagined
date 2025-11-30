@@ -1,4 +1,38 @@
-const coursesData = [
+// src/data/courses.js
+
+// Base registration window (change these if you want a different period)
+const BASE_REGISTRATION_START = "2025-08-01"; // registration opens
+const BASE_REGISTRATION_END = "2025-08-15"; // registration closes
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const ONE_WEEK_MS = 7 * ONE_DAY_MS;
+
+/**
+ * Compute registration and drop dates for a course based on its creditType.
+ * creditType is expected to be a string like "1", "2", "3" — convert to Number.
+ * Drop date = registrationEndDate + (credit * 7 days)
+ */
+function computeDatesForCredit(creditType) {
+  const creditNum = Number(creditType) || 0;
+  const regStart = new Date(BASE_REGISTRATION_START);
+  const regEnd = new Date(BASE_REGISTRATION_END);
+
+  // Drop date offset: 1-credit -> +7 days, 2-credit -> +14 days, 3-credit -> +21 days
+  const dropOffset = creditNum * ONE_WEEK_MS;
+
+  const dropDate = new Date(regEnd.getTime() + dropOffset);
+
+  // Return as ISO date (YYYY-MM-DD)
+  const toIsoDate = (d) => d.toISOString().split("T")[0];
+
+  return {
+    registrationDate: toIsoDate(regStart),
+    registrationEndDate: toIsoDate(regEnd),
+    dropDate: toIsoDate(dropDate),
+  };
+}
+
+const rawCourses = [
   // ===== SEMESTER 1 =====
   // Departmental Core - 3 Credits
   {
@@ -413,5 +447,13 @@ const coursesData = [
     filledSeats: 42,
   },
 ];
+
+const coursesData = rawCourses.map((course) => {
+  const dates = computeDatesForCredit(course.creditType);
+  return {
+    ...course,
+    ...dates,
+  };
+});
 
 export default coursesData;

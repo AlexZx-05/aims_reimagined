@@ -1,7 +1,87 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import AppLayout from "../layouts/AppLayout";
 import coursesData from "../data/courses";
 import creditRules from "../data/creditRules";
+
+function CustomSelect({
+  value,
+  onChange,
+  options = [],
+  disabled = false,
+  className = "",
+  placeholder = "",
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    function handleDocClick(e) {
+      if (!rootRef.current) return;
+      if (!rootRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleDocClick);
+    return () => document.removeEventListener("mousedown", handleDocClick);
+  }, []);
+
+  const selectedLabel = options.find((o) => o.value === value)?.label ?? "";
+
+  return (
+    <div
+      ref={rootRef}
+      className={`relative text-sm ${className}`}
+      aria-expanded={open}
+    >
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((s) => !s)}
+        className={`w-full text-left px-4 py-2.5 border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow flex items-center justify-between ${
+          disabled ? "opacity-60 cursor-not-allowed" : "hover:shadow-md"
+        }`}
+      >
+        <span className="truncate">{selectedLabel || placeholder}</span>
+        <svg
+          className="w-4 h-4 ml-2"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {open && !disabled && (
+        <ul
+          role="listbox"
+          className="absolute right-0 left-0 mt-2 max-h-56 overflow-auto bg-white border rounded-lg shadow-lg z-50 py-1"
+        >
+          {options.map((opt) => (
+            <li
+              key={opt.value}
+              role="option"
+              aria-selected={opt.value === value}
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+              className={`px-4 py-2 cursor-pointer truncate ${
+                opt.value === value
+                  ? "bg-blue-50 text-blue-800 font-semibold"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {opt.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function CourseRegistration() {
   const [registered, setRegistered] = useState(() => {
@@ -22,17 +102,14 @@ export default function CourseRegistration() {
   const [semesterFilter, setSemesterFilter] = useState("All");
   const [creditTypeFilter, setCreditTypeFilter] = useState("All");
 
-  // registrationType per course (Regular / Backlog / Improvement / Honours)
   const [regType, setRegType] = useState({}); // { [courseId]: "Backlog" }
-  // which course info tooltip is hovered (to keep tooltip visible when moving between icon and tooltip)
   const [hoverInfo, setHoverInfo] = useState(null);
-  // Submission deadline: edit this date or set `course_deadline` in localStorage (ISO string)
+
   const submissionDeadline = new Date(
     localStorage.getItem("course_deadline") || "2025-12-31T23:59:59"
   );
   const isBeforeDeadline = new Date() <= submissionDeadline;
 
-  // Auto-save registered courses
   useEffect(() => {
     localStorage.setItem("registered_courses", JSON.stringify(registered));
     const now = new Date().toLocaleString();
@@ -75,39 +152,29 @@ export default function CourseRegistration() {
   }, [courses, categoryFilter, searchTerm, semesterFilter, creditTypeFilter]);
 
   const addCourse = (course) => {
-    // If submitted and past deadline, prevent adding
     if (submitted && !isBeforeDeadline) return;
-
     if (registered.some((c) => c.id === course.id)) return;
-
     if (course.filledSeats >= course.totalSeats) return;
-
-    const registrationType = regType[course.id] || "Regular";
-
+    const registrationType = regType[course.id] || "Departmental Core";
     if (totalCredits + course.credits > creditRules.max) return;
 
     setRegistered([...registered, { ...course, registrationType }]);
 
     setCourses((prev) =>
       prev.map((c) =>
-        c.id === course.id
-          ? { ...c, filledSeats: c.filledSeats + 1 }
-          : c
+        c.id === course.id ? { ...c, filledSeats: c.filledSeats + 1 } : c
       )
     );
   };
 
   const dropCourse = (course) => {
-    // If submitted and past deadline, prevent dropping
     if (submitted && !isBeforeDeadline) return;
 
     setRegistered(registered.filter((c) => c.id !== course.id));
 
     setCourses((prev) =>
       prev.map((c) =>
-        c.id === course.id
-          ? { ...c, filledSeats: c.filledSeats - 1 }
-          : c
+        c.id === course.id ? { ...c, filledSeats: c.filledSeats - 1 } : c
       )
     );
   };
@@ -156,6 +223,37 @@ export default function CourseRegistration() {
     : registered.length > 0
     ? "bg-yellow-50 border-yellow-300"
     : "bg-red-50 border-red-300";
+
+  const categoryFilterOptions = useMemo(
+    () => categoryOptions.map((c) => ({ value: c, label: c === "All" ? "All Categories" : c })),
+    [categoryOptions]
+  );
+
+  const semesterFilterOptions = [
+    { value: "All", label: "All Semesters" },
+    { value: "1", label: "Semester 1" },
+    { value: "2", label: "Semester 2" },
+    { value: "3", label: "Semester 3" },
+    { value: "4", label: "Semester 4" },
+    { value: "5", label: "Semester 5" },
+    { value: "6", label: "Semester 6" },
+    { value: "7", label: "Semester 7" },
+    { value: "8", label: "Semester 8" },
+  ];
+
+  const creditTypeFilterOptions = [
+    { value: "All", label: "All Credit Types" },
+    { value: "1", label: "1 Credit" },
+    { value: "3", label: "3 Credits" },
+    { value: "4", label: "4 Credits" },
+  ];
+
+  const regTypeOptions = [
+    { value: "Departmental Core", label: "Departmental Core" },
+    { value: "Backlog", label: "Backlog" },
+    { value: "Improvement", label: "Improvement" },
+    { value: "Honours", label: "Honours" },
+  ];
 
   return (
     <AppLayout>
@@ -233,77 +331,44 @@ export default function CourseRegistration() {
 
       {/* COURSE LIST */}
       <section className="bg-white p-6 rounded-xl shadow border mb-10">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          <h2 className="text-xl font-semibold">Available Courses</h2>
+        <div className="flex flex-col md:flex-row md:items:center md:justify-between gap-4 mb-4">
+          <h2 className="text-xl font-semibold">Courses</h2>
 
-          <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
             <input
               type="text"
-              className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400"
+              className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400 flex-1 max-h-[40px]"
               placeholder="Search code or name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
 
-            <select
-              className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400 hover:shadow-md cursor-pointer appearance-none font-medium"
-              style={{
-                backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 0.7rem center',
-                backgroundSize: '1.2em 1.2em',
-                paddingRight: '2.5rem'
-              }}
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-            >
-              {categoryOptions.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat === "All" ? "All Categories" : cat}
-                </option>
-              ))}
-            </select>
+            <div style={{ minWidth: 200 }}>
+              <CustomSelect
+                value={categoryFilter}
+                onChange={(v) => setCategoryFilter(v)}
+                options={categoryFilterOptions}
+                placeholder="All Categories"
+              />
+            </div>
 
-            <select
-              className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400 hover:shadow-md cursor-pointer appearance-none font-medium"
-              style={{
-                backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 0.7rem center',
-                backgroundSize: '1.2em 1.2em',
-                paddingRight: '2.5rem'
-              }}
-              value={semesterFilter}
-              onChange={(e) => setSemesterFilter(e.target.value)}
-            >
-              <option value="All">All Semesters</option>
-              <option value="1">Semester 1</option>
-              <option value="2">Semester 2</option>
-              <option value="3">Semester 3</option>
-              <option value="4">Semester 4</option>
-              <option value="5">Semester 5</option>
-              <option value="6">Semester 6</option>
-              <option value="7">Semester 7</option>
-              <option value="8">Semester 8</option>
-            </select>
+            <div style={{ minWidth: 180 }}>
+              <CustomSelect
+                value={semesterFilter}
+                onChange={(v) => setSemesterFilter(v)}
+                options={semesterFilterOptions}
+                placeholder="All Semesters"
+              />
+            </div>
 
-            <select
-              className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400 hover:shadow-md cursor-pointer appearance-none font-medium"
-              style={{
-                backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 0.7rem center',
-                backgroundSize: '1.2em 1.2em',
-                paddingRight: '2.5rem'
-              }}
-              value={creditTypeFilter}
-              onChange={(e) => setCreditTypeFilter(e.target.value)}
-            >
-              <option value="All">All Credit Types</option>
-              <option value="1">1 Credit</option>
-              <option value="3">3 Credits</option>
-              <option value="4">4 Credits</option>
-            </select>
+            <div style={{ minWidth: 180 }}>
+              <CustomSelect
+                value={creditTypeFilter}
+                onChange={(v) => setCreditTypeFilter(v)}
+                options={creditTypeFilterOptions}
+                placeholder="All Credit Types"
+              />
+            </div>
           </div>
         </div>
 
@@ -314,7 +379,7 @@ export default function CourseRegistration() {
             const alreadyAdded = registered.some((c) => c.id === course.id);
             const creditExceeded =
               totalCredits + course.credits > creditRules.max;
-            const regTypeForCourse = regType[course.id] || "Regular";
+            const regTypeForCourse = regType[course.id] || "Departmental Core";
             const vacantSeats = course.totalSeats - course.filledSeats;
 
             return (
@@ -338,7 +403,11 @@ export default function CourseRegistration() {
                       </span>
 
                       {/* ENHANCED TOOLTIP (visible on hover or while hovered state is set) */}
-                      <div className={`absolute left-6 top-0 z-20 ${hoverInfo === course.id ? 'block' : 'hidden'} group-hover:block`}>
+                      <div
+                        className={`absolute left-6 top-0 z-20 ${hoverInfo === course.id ? 'block' : 'hidden'} group-hover:block`}
+                        onMouseEnter={() => setHoverInfo(course.id)}
+                        onMouseLeave={() => setHoverInfo(null)}
+                      >
                         <div className="p-4 bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl shadow-xl w-80">
                           {/* Header */}
                           <div className="border-b border-gray-200 pb-3 mb-3">
@@ -371,7 +440,7 @@ export default function CourseRegistration() {
                           </div>
 
                           {/* Seat Information */}
-                          <div>
+                          <div className="mb-3 pb-3 border-b border-gray-100">
                             <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-2">Seat Information</p>
                             <div className="space-y-2">
                               <div className="flex justify-between items-center">
@@ -388,14 +457,30 @@ export default function CourseRegistration() {
                                   {vacantSeats}
                                 </span>
                               </div>
-                              {/* Seat Progress Bar */}
                               <div className="mt-2 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                                 <div
-                                  className={`h-2 transition-all ${
-                                    isFull ? 'bg-red-500' : course.filledSeats / course.totalSeats > 0.75 ? 'bg-orange-500' : 'bg-green-500'
-                                  }`}
+                                  className={`h-2 transition-all ${isFull ? 'bg-red-500' : course.filledSeats / course.totalSeats > 0.75 ? 'bg-orange-500' : 'bg-green-500'}`}
                                   style={{ width: `${(course.filledSeats / course.totalSeats) * 100}%` }}
                                 ></div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Registration Dates (new) */}
+                          <div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-2">Registration & Drop Dates</p>
+                            <div className="space-y-1 text-sm text-gray-700">
+                              <div className="flex justify-between">
+                                <span className="text-xs text-gray-600">Registration Starts:</span>
+                                <span className="font-medium">{course.registrationDate ?? "N/A"}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-xs text-gray-600">Registration Ends:</span>
+                                <span className="font-medium">{course.registrationEndDate ?? "N/A"}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-xs text-gray-600">Drop Deadline:</span>
+                                <span className="font-medium">{course.dropDate ?? "N/A"}</span>
                               </div>
                             </div>
                           </div>
@@ -404,37 +489,25 @@ export default function CourseRegistration() {
                     </div>
                   </div>
 
-                  <p className="text-gray-600 text-sm">{course.faculty}</p>
-                  <p className="text-gray-500 text-xs">Category: {course.category}</p>
-                  <p className="text-gray-500 text-xs">Semester: {course.semester} | Credits: {course.creditType} Credit(s)</p>
+                  {/* previously visible details removed — now they only live inside the tooltip */}
                 </div>
 
                 {/* RIGHT */}
                 <div className="flex flex-col items-end gap-2 mt-3 md:mt-0">
                   <div className="flex gap-2">
-                    <select
-                      disabled={submitted && !isBeforeDeadline}
-                      className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:border-gray-400 hover:shadow-md cursor-pointer appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 0.5rem center',
-                        backgroundSize: '1rem 1rem',
-                        paddingRight: '2rem'
-                      }}
-                      value={regTypeForCourse}
-                      onChange={(e) =>
-                        setRegType((prev) => ({
-                          ...prev,
-                          [course.id]: e.target.value,
-                        }))
-                      }
-                    >
-                      <option value="Regular">Regular</option>
-                      <option value="Backlog">Backlog</option>
-                      <option value="Improvement">Improvement</option>
-                      <option value="Honours">Honours</option>
-                    </select>
+                    <div style={{ minWidth: 160 }}>
+                      <CustomSelect
+                        disabled={submitted && !isBeforeDeadline}
+                        value={regTypeForCourse}
+                        onChange={(v) =>
+                          setRegType((prev) => ({
+                            ...prev,
+                            [course.id]: v,
+                          }))
+                        }
+                        options={regTypeOptions}
+                      />
+                    </div>
 
                     <button
                       onClick={() => addCourse(course)}
