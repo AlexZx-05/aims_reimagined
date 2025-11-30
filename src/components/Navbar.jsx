@@ -25,7 +25,7 @@ export default function Navbar({ collapsed }) {
         <input
           type="text"
           placeholder="Search"
-          className="w-96 px-4 py-2 bg-gray-100 rounded-full border border-gray-200 outline-none focus:ring-2 focus:ring-blue-100 transition"
+          className="w-[550px] px-4 py-2 bg-gray-100 rounded-full border border-gray-200 outline-none focus:ring-2 focus:ring-blue-100 transition"
         />
       </div>
 
