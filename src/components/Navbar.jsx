@@ -14,7 +14,7 @@ export default function Navbar({ collapsed }) {
     <div
       // Added transition and marginLeft to push navbar when sidebar expands
       className={`sticky top-0 z-20 h-16 bg-white border-b flex items-center px-6 transition-all duration-300 ${
-        collapsed ? "ml-20" : "ml-64"
+        collapsed ? "ml-0" : "ml-0"
       }`}
     >
       {/* Left side empty now (toggle moved to sidebar) */}
