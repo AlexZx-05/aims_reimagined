@@ -1,11 +1,34 @@
+# AIMS Reimagined – Academic Institute Management System
 
-# Getting Started with Create React App
+AIMS Reimagined is a modern academic portal built with React that simulates a real university ERP system.  
+It allows students to log in and view their dashboard, grades, courses, attendance, fees, scholarships, and profile details.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+---
 
-## Available Scripts
+## 🔑 Demo Login Credentials
 
-In the project directory, you can run:
+| Role | Email | Password |
+|------|------------------------|----------|
+| Student (Deepak) | cs22b1024@iiitr.ac.in | 123456 |
+
+---
+
+## 🚀 Features
+- Secure Login System  
+- Student Profile  
+- Academic Dashboard  
+- Course Registration  
+- Grades & Attendance  
+- Scholarships  
+- Notifications  
+
+---
+
+## ▶ How to Run the Project
+
+npm install  
+npm start  
+http://localhost:3000
 
 ### `npm start`
 
