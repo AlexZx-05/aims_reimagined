@@ -41,4 +41,11 @@ It allows students to log in and view their dashboard, grades, courses, attendan
 
 1. Clone the repository  
 2. Install dependencies:
+3.  Run the Project
+
+```bash
+npm install
+npm start
+
+   
 
